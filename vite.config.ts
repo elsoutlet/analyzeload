@@ -3,6 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	base: '/analyzeload/',  // <-- THIS is required for correct asset paths on GitHub Pages
 	plugins: [tailwindcss(), sveltekit()],
 	test: {
 		projects: [
