@@ -1,11 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <title>Department Analyzer</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 </head>
+
 <body>
-    
+
+    <div class="container">
+        <div class="header">
+            <img src="favicon.svg" width="10%">
+        </div>
+        <h1>Department Analyzer</h1>
+        <div class="spinner" id="spinner" style="display: none;"></div>
+        <input type="file" accept=".csv" id="csvInput" />
+        <p class="error" id="error"></p>
+
+        <div id="results" style="display: none;">
+            <h2>Summary</h2>
+            <ul id="summaryList"></ul>
+
+            <button id="downloadTotalsBtn">Download Totals</button>
+            <button id="downloadCountsBtn">Download Counts</button>
+            <button id="downloadSummaryBtn">Download Summary</button>
+
+            <h3>Preview: Department Counts</h3>
+            <pre id="countsPreview"></pre>
+
+            <h3>Preview: Department Totals</h3>
+            <pre id="totalsPreview"></pre>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="app.js"></script>
 </body>
+
 </html>
