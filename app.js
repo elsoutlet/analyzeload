@@ -107,7 +107,7 @@ function processCSVData(rows) {
     for (const row of rows) {
         console.log(row)
         const dept = row["Department Name"]?.trim();
-        const value = parseFloat(row["Extended Price"] || '0');
+        const value = parseFloat(row["Ext Liquidation Prc"] || '0');
         if (!dept || isNaN(value)) continue;
 
         counts[dept] = (counts[dept] || 0) + 1;
