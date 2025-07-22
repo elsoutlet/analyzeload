@@ -21,7 +21,6 @@ function handleFileInput(event) {
     showSpinner();
 
     readFile(file)
-        .then(text => parseCSV(text))
         .then(data => processCSVData(data))
         .then(processed => {
             renderResults(processed);
@@ -29,14 +28,35 @@ function handleFileInput(event) {
         })
         .catch(e => {
             console.error(e);
-            errorEl.textContent = 'Failed to parse or process CSV file.';
+            errorEl.textContent = 'Failed to parse or process file.';
             hideSpinner();
         });
 }
 
-// File reading logic
+// File reading logic (supports CSV and XLSX)
 function readFile(file) {
-    return file.text();
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'xlsx') {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                    resolve(json);
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    } else {
+        // Default to CSV
+        return file.text().then(text => parseCSV(text));
+    }
 }
 
 // CSV parsing logic
