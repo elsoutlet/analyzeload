@@ -130,7 +130,7 @@ function processCSVData(rows) {
         const value = parseFloat(row["Ext Liquidation Prc"] || '0');
         if (!dept || isNaN(value)) continue;
 
-        counts[dept] = (counts[dept] || 0) + 1;
+        counts[dept] = (counts[dept] || 0) + parseInt(row["Quantity"]);
         totals[dept] = (totals[dept] || 0) + value;
 
         summary.grandTotal += value;
