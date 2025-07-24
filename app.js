@@ -7,6 +7,7 @@ const totalsPreview = document.getElementById('totalsPreview');
 const downloadTotalsBtn = document.getElementById('downloadTotalsBtn');
 const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
 const downloadCountsBtn = document.getElementById('downloadCountsBtn');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
 const spinner = document.getElementById('spinner');
 
 // File handling logic
@@ -67,26 +68,42 @@ function parseCSV(text) {
 
 downloadTotalsBtn.addEventListener('click', () => {
     if (!window.lastProcessed) return;
-
     const data = window.lastProcessed;
-    downloadFile('summary.json', JSON.stringify(data.summary, null, 2), 'application/json');
-
-    const countsCSV = data.departmentCounts.map(d => `${d.department},${d.count},${d.percentage.toFixed(2)}`).join('\n');
-    downloadFile('department_counts.csv', 'Department,Count,Percentage\n' + countsCSV, 'text/csv');
-
     const totalsCSV = data.departmentTotals.map(d => `${d.department},${d.total.toFixed(2)},${d.average.toFixed(2)},${d.percentage.toFixed(2)}`).join('\n');
     downloadFile('department_totals.csv', 'Department,Total,Average,Percentage\n' + totalsCSV, 'text/csv');
 });
 downloadCountsBtn.addEventListener('click', () => {
     if (!window.lastProcessed) return;
+    const data = window.lastProcessed;
     const countsCSV = data.departmentCounts.map(d => `${d.department},${d.count},${d.percentage.toFixed(2)}`).join('\n');
     downloadFile('department_counts.csv', 'Department,Count,Percentage\n' + countsCSV, 'text/csv');
 });
 downloadSummaryBtn.addEventListener('click', () => {
     if (!window.lastProcessed) return;
-
     const data = window.lastProcessed;
     downloadFile('summary.json', JSON.stringify(data.summary, null, 2), 'application/json');
+});
+
+downloadAllBtn.addEventListener('click', () => {
+    if (!window.lastProcessed) return;
+    const data = window.lastProcessed;
+    const JSZipScript = document.createElement('script');
+    JSZipScript.src = 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';
+    JSZipScript.onload = () => {
+        const zip = new JSZip();
+        zip.file('summary.json', JSON.stringify(data.summary, null, 2));
+        const countsCSV = data.departmentCounts.map(d => `${d.department},${d.count},${d.percentage.toFixed(2)}`).join('\n');
+        zip.file('department_counts.csv', 'Department,Count,Percentage\n' + countsCSV);
+        const totalsCSV = data.departmentTotals.map(d => `${d.department},${d.total.toFixed(2)},${d.average.toFixed(2)},${d.percentage.toFixed(2)}`).join('\n');
+        zip.file('department_totals.csv', 'Department,Total,Average,Percentage\n' + totalsCSV);
+        zip.generateAsync({ type: 'blob' }).then(function (content) {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(content);
+            a.download = 'department_analyzer_results.zip';
+            a.click();
+        });
+    };
+    document.body.appendChild(JSZipScript);
 });
 
 function renderResults(processed) {
@@ -136,11 +153,12 @@ function processCSVData(rows) {
         summary.grandTotal += value;
     }
 
+    const totalCount = Object.values(counts).reduce((a, b) => a + b, 0);
     const departmentCounts = Object.keys(counts).map(dept => {
         return {
             department: dept,
             count: counts[dept],
-            percentage: (counts[dept] / summary.totalRows) * 100
+            percentage: (counts[dept] / totalCount) * 100
         };
     });
 
